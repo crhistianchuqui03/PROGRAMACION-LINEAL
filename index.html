@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Matrices y Programación Lineal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-image: url('https://profuturo.education/wp-content/uploads/2022/03/Captura-de-pantalla-2022-03-11-a-las-10.51.35.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed; /* Optional: makes background fixed when scrolling */
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans antialiased leading-relaxed">
+
+ <!-- Sección de Programación Lineal con problemas predefinidos -->
+<div class="max-w-6xl mx-auto p-10 bg-white shadow-2xl rounded-2xl my-16">
+  <h1 class="text-4xl font-extrabold text-green-800 mb-10 text-center">📈 Programación Lineal</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+    <button onclick="cargarProblema(1)" class="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75">Maximizar U</button>
+    <button onclick="cargarProblema(2)" class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-75">Minimizar P</button>
+    <button onclick="cargarProblema(3)" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-75">Minimizar C</button>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-10 mb-12">
+    <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+      <label class="block font-semibold text-gray-700 mb-3 text-base">Función objetivo (Z = c₁·x₁ + c₂·x₂):</label>
+      <input id="c1" type="number" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400" value="3">
+      <input id="c2" type="number" class="w-full mt-4 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400" value="1">
+      <div class="mt-8">
+        <label class="block font-semibold text-gray-700 mb-3 text-base">Tipo de optimización:</label>
+        <select id="tipoOptimizacion" class="w-full border border-gray-300 p-3 rounded-lg appearance-none leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900">
+          <option value="max">Maximizar</option>
+          <option value="min">Minimizar</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+      <label class="block font-semibold text-gray-700 mb-3 text-base">Restricciones (una por línea):</label>
+      <textarea id="restricciones" rows="6" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"></textarea>
+    </div>
+  </div>
+
+  <button onclick="graficarManual()" class="w-full mt-10 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-4 px-8 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75">
+    Graficar restricciones y solución
+  </button>
+
+  <!-- Botón para limpiar datos -->
+  <button onclick="limpiarDatos()" class="w-full mt-4 bg-gray-400 hover:bg-gray-500 text-white font-semibold py-4 px-8 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-75">
+    Limpiar Datos
+  </button>
+
+  <canvas id="canvas" width="520" height="520" class="border border-gray-300 mt-12 mx-auto block bg-white shadow-xl rounded-lg"></canvas>
+
+  <!-- Area to display results -->
+  <div id="resultsDisplay" class="mt-10 p-8 bg-gray-50 rounded-xl shadow-lg text-center text-xl font-semibold text-gray-800"></div>
+
+</div>
+
+<script>
+function cargarProblema(id) {
+  if (id === 1) {
+    // Maximizar U = 3x1 + x2
+    document.getElementById("c1").value = 3;
+    document.getElementById("c2").value = 1;
+    document.getElementById("tipoOptimizacion").value = "max";
+    document.getElementById("restricciones").value = "2x1 + x2 <= 8\n2x1 + 3x2 <= 12";
+  } else if (id === 2) {
+    // Minimizar P = 24x1 + 28x2
+    document.getElementById("c1").value = 24;
+    document.getElementById("c2").value = 28;
+    document.getElementById("tipoOptimizacion").value = "min";
+    document.getElementById("restricciones").value = "5x1 + 4x2 <= 2000\nx1 + x2 >= 300\nx1 >= 80\nx2 >= 100";
+  } else if (id === 3) {
+    // Minimizar C = 80x1 + 100x2
+    document.getElementById("c1").value = 80;
+    document.getElementById("c2").value = 100;
+    document.getElementById("tipoOptimizacion").value = "min";
+    document.getElementById("restricciones").value = "2x1 + 2x2 >= 80\n6x1 + 2x2 >= 120\n4x1 + 12x2 >= 240";
+  }
+}
+
+function parseRestricciones(texto) {
+  return texto.trim().split("\n").map(linea => {
+    const matchMenor = linea.match(/([\d.]+)?x1\s*\+\s*([\d.]+)?x2\s*<=\s*([\d.]+)/);
+    const matchMayor = linea.match(/([\d.]+)?x1\s*\+\s*([\d.]+)?x2\s*>=\s*([\d.]+)/);
+    const matchIgual = linea.match(/([\d.]+)?x1\s*\+\s*([\d.]+)?x2\s*=\s*([\d.]+)/);
+
+    if (matchMenor) {
+      return { a: parseFloat(matchMenor[1] || "1"), b: parseFloat(matchMenor[2] || "1"), c: parseFloat(matchMenor[3]), tipo: "<=" };
+    } else if (matchMayor) {
+      return { a: parseFloat(matchMayor[1] || "1"), b: parseFloat(matchMayor[2] || "1"), c: parseFloat(matchMayor[3]), tipo: ">=" };
+    } else if (matchIgual) {
+      return { a: parseFloat(matchIgual[1] || "1"), b: parseFloat(matchIgual[2] || "1"), c: parseFloat(matchIgual[3]), tipo: "=" };
+    }
+    return null;
+  }).filter(x => x !== null);
+}
+
+function esFactible(p, restricciones) {
+  return restricciones.every(({ a, b, c, tipo }) => {
+    const valor = a * p.x + b * p.y;
+    if (tipo === "<=") return valor <= c + 1e-6;
+    if (tipo === ">=") return valor >= c - 1e-6;
+    if (tipo === "=") return Math.abs(valor - c) < 1e-6;
+    return false;
+  }) && p.x >= 0 && p.y >= 0;
+}
+
+// Helper function to find the intersection of two lines (a1*x + b1*y = c1 and a2*x + b2*y = c2)
+function findIntersection(r1, r2) {
+  const det = r1.a * r2.b - r2.a * r1.b;
+  if (Math.abs(det) < 1e-9) { // Lines are parallel or coincident
+    return null;
+  }
+  const x = (r1.c * r2.b - r2.c * r1.b) / det;
+  const y = (r1.a * r2.c - r2.a * r1.c) / det;
+  return { x, y };
+}
+
+function graficarManual() {
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const width = canvas.width;
+  const height = canvas.height;
+  let scale = 40; // Initial scale, might adjust later
+  const tipo = document.getElementById("tipoOptimizacion").value;
+  const c1 = parseFloat(document.getElementById("c1").value);
+  const c2 = parseFloat(document.getElementById("c2").value);
+  const restricciones = parseRestricciones(document.getElementById("restricciones").value);
+  const resultsDisplay = document.getElementById("resultsDisplay");
+
+  // Clear canvas and results area
+  ctx.clearRect(0, 0, width, height);
+  resultsDisplay.innerHTML = ''; // Clear previous results
+
+    // Add explanation of the graph
+    // resultsDisplay.innerHTML += \`\n    //     <p><strong>Explicación del Gráfico:</strong></p>\n    //     <p>Las líneas azules representan las restricciones del problema.</p>\n    //     <p>El área sombreada en verde claro es la región factible, que contiene todos los puntos que satisfacen todas las restricciones.</p>\n    // \`;
+
+  // Draw axes with updated scale
+  ctx.beginPath();
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 1;
+    // X-axis
+  ctx.moveTo(0, height);
+  ctx.lineTo(width, height);
+    // Y-axis
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0, height);
+  ctx.stroke();
+
+  // Find vertices
+  let vertices = [{ x: 0, y: 0 }]; // Start with origin
+
+  // Intersections with axes
+  restricciones.forEach(r => {
+    // Intersection with x-axis (y=0)
+    if (r.a !== 0) {
+      const x = r.c / r.a;
+      if (x >= 0 && esFactible({ x, y: 0 }, restricciones)) {
+        vertices.push({ x, y: 0 });
+      }
+    }
+    // Intersection with y-axis (x=0)
+    if (r.b !== 0) {
+      const y = r.c / r.b;
+      if (y >= 0 && esFactible({ x: 0, y }, restricciones)) {
+        vertices.push({ x: 0, y });
+      }
+    }
+  });
+
+  // Intersections of constraints
+  for (let i = 0; i < restricciones.length; i++) {
+    for (let j = i + 1; j < restricciones.length; j++) {
+      const intersection = findIntersection(restricciones[i], restricciones[j]);
+      if (intersection && intersection.x >= 0 && intersection.y >= 0 && esFactible(intersection, restricciones)) {
+        vertices.push(intersection);
+      }
+    }
+  }
+
+  // Remove duplicate vertices (basic check)
+  const uniqueVertices = [];
+  vertices.forEach(v1 => {
+    const isDuplicate = uniqueVertices.some(v2 => Math.abs(v1.x - v2.x) < 1e-9 && Math.abs(v1.y - v2.y) < 1e-9);
+    if (!isDuplicate) {
+      uniqueVertices.push(v1);
+    }
+  });
+
+    // Filter for feasible vertices and ensure non-negativity
+    const feasibleVertices = uniqueVertices.filter(v => esFactible(v, restricciones));
+
+  // Find optimal vertex among feasible ones
+  let optimo = null;
+  let zOpt = tipo === "max" ? -Infinity : Infinity;
+
+  feasibleVertices.forEach(v => {
+    const z = c1 * v.x + c2 * v.y;
+    if ((tipo === "max" && z > zOpt) || (tipo === "min" && z < zOpt)) {
+      zOpt = z;
+      optimo = v;
+    }
+  });
+
+  // Determine dynamic scale based on feasible vertices and constraints
+  let maxDisplayX = 0;
+  let maxDisplayY = 0;
+
+  feasibleVertices.forEach(v => {
+    maxDisplayX = Math.max(maxDisplayX, v.x);
+    maxDisplayY = Math.max(maxDisplayY, v.y);
+  });
+
+  restricciones.forEach(({ a, b, c }) => {
+      // Consider intercepts for scale even if they are not feasible vertices
+      if (a !== 0) maxDisplayX = Math.max(maxDisplayX, c / a);
+      if (b !== 0) maxDisplayY = Math.max(maxDisplayY, c / b);
+  });
+
+
+  // Add some padding and ensure min scale
+  maxDisplayX = Math.max(maxDisplayX * 1.2, 10); // Ensure a minimum display area
+  maxDisplayY = Math.max(maxDisplayY * 1.2, 10); // Ensure a minimum display area
+
+  const scaleX = width / maxDisplayX;
+  const scaleY = height / maxDisplayY;
+
+  scale = Math.min(scaleX, scaleY) || 40; // Use the smaller scale to fit both axes, default to 40 if no constraints
+
+  // Redraw canvas with calculated scale
+    ctx.clearRect(0, 0, width, height);
+
+  // Draw axes with updated scale
+  ctx.beginPath();
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 1;
+    // X-axis
+  ctx.moveTo(0, height);
+  ctx.lineTo(width, height);
+    // Y-axis
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0, height);
+  ctx.stroke();
+
+    // Draw grid lines with updated scale (optional, can uncomment if needed)
+    // ctx.strokeStyle = "#ddd";
+    // for (let i = 0; i * scale <= width; i++) {
+    //     ctx.beginPath();
+    //     ctx.moveTo(i * scale, 0);
+    //     ctx.lineTo(i * scale, height);
+    //     ctx.stroke();
+    // }
+    // for (let i = 0; i * scale <= height; i++) {
+    //     ctx.beginPath();
+    //     ctx.moveTo(0, height - i * scale);
+    //     ctx.lineTo(width, height - i * scale);
+    //     ctx.stroke();
+    // }
+
+
+  // Draw constraints with updated scale
+  restricciones.forEach(({ a, b, c, tipo }) => {
+    ctx.beginPath();
+    ctx.strokeStyle = "blue";
+    ctx.lineWidth = 2;
+
+    // Find two points on the line based on the calculated scale and canvas size
+    let p1 = null;
+    let p2 = null;
+
+    if (b !== 0) { // Line is not vertical
+        // Point on y-axis (x=0)
+        const y1 = c / b;
+        if (y1 * scale <= height) p1 = { x: 0, y: y1 };
+
+        // Point on x-axis (y=0)
+        const x1 = c / a;
+        if (x1 * scale <= width) {
+            if (!p1) p1 = { x: x1, y: 0 };
+            else p2 = { x: x1, y: 0 };
+        }
+
+        // If only one point found, find another on the edge of the canvas
+        if (!p2 && p1) {
+            if (p1.x === 0) p2 = { x: width / scale, y: (c - a * (width / scale)) / b };
+            else p2 = { x: (c - b * (height / scale)) / a, y: height / scale };
+        }
+
+    } else { // Line is vertical (b === 0, so a must be non-zero for a valid constraint)
+        const x_val = c / a;
+         if (x_val * scale <= width) {
+            p1 = { x: x_val, y: 0 };
+            p2 = { x: x_val, y: height / scale };
+         }
+    }
+
+    if (p1 && p2) {
+        ctx.moveTo(p1.x * scale, height - p1.y * scale);
+        ctx.lineTo(p2.x * scale, height - p2.y * scale);
+        ctx.stroke();
+
+        // Draw constraint label (position needs adjustment with dynamic scale)
+        // For simplicity, let's place it near one end of the line segment drawn
+         const labelX = p1.x * scale + 5;
+         const labelY = height - p1.y * scale - 5;
+        ctx.fillStyle = "blue";
+        ctx.fillText(`${a}x₁ + ${b}x₂ ${tipo} ${c}`, labelX, labelY);
+    }
+  });
+
+  // Draw feasible region (attempting a simple approach - may need refinement)
+    if(feasibleVertices.length > 0) {
+        // Sort vertices by angle around a central point to draw polygon
+        const center = feasibleVertices.reduce((sum, v) => ({ x: sum.x + v.x, y: sum.y + v.y }), { x: 0, y: 0 });
+        center.x /= feasibleVertices.length;
+        center.y /= feasibleVertices.length;
+
+        feasibleVertices.sort((v1, v2) => {
+            const angle1 = Math.atan2(v1.y - center.y, v1.x - center.x);
+            const angle2 = Math.atan2(v2.y - center.y, v2.x - center.x);
+            return angle1 - angle2;
+        });
+
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(144, 238, 144, 0.5)"; // Light green with transparency
+        ctx.moveTo(feasibleVertices[0].x * scale, height - feasibleVertices[0].y * scale);
+
+        for(let i = 1; i < feasibleVertices.length; i++) {
+            ctx.lineTo(feasibleVertices[i].x * scale, height - feasibleVertices[i].y * scale);
+        }
+
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // Draw contour lines for the objective function to make it more didactic
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.5)"; // Semi-transparent black for contour lines
+    ctx.lineWidth = 1;
+    const numContourLines = 5; // Number of contour lines to draw
+
+    // Determine a range of Z values to display contour lines for
+    // We can use the Z value at the origin (0) and the optimal Z value as a guide
+    const zOrigin = c1 * 0 + c2 * 0; // Z at (0,0) is always 0
+    const zOptimal = optimo ? zOpt : 0; // Use optimal Z if found, otherwise 0
+
+    const minZ = Math.min(zOrigin, zOptimal);
+    const maxZ = Math.max(zOrigin, zOptimal);
+    const zRange = maxZ - minZ;
+    const zStep = zRange / (numContourLines + 1);
+
+    for (let i = 1; i <= numContourLines; i++) {
+        const zValue = minZ + i * zStep;
+        // For the line c1*x + c2*y = zValue
+
+        ctx.beginPath();
+
+        // Find two points on this contour line within the canvas bounds
+        let p1 = null;
+        let p2 = null;
+
+        if (c2 !== 0) { // Line is not vertical
+            // Point on y-axis (x=0)
+            const y1 = zValue / c2;
+            if (y1 * scale >= 0 && y1 * scale <= height) p1 = { x: 0, y: y1 };
+
+            // Point on x-axis (y=0)
+            const x1 = zValue / c1;
+             if (x1 * scale >= 0 && x1 * scale <= width) {
+                if (!p1) p1 = { x: x1, y: 0 };
+                else p2 = { x: x1, y: 0 };
+             }
+
+             // If only one point found, find another on the edge of the canvas
+             if (!p2 && p1) {
+                 if (p1.x === 0) p2 = { x: width / scale, y: (zValue - c1 * (width / scale)) / c2 };
+                 else p2 = { x: (zValue - c2 * (height / scale)) / c1, y: height / scale };
+             }
+
+        } else if (c1 !== 0) { // Line is vertical (c2 === 0)
+            const x_val = zValue / c1;
+             if (x_val * scale >= 0 && x_val * scale <= width) {
+                p1 = { x: x_val, y: 0 };
+                p2 = { x: x_val, y: height / scale };
+             }
+        }
+
+        if (p1 && p2) {
+            ctx.moveTo(p1.x * scale, height - p1.y * scale);
+            ctx.lineTo(p2.x * scale, height - p2.y * scale);
+            ctx.stroke();
+
+            // Add label for the contour line value
+            const labelX = p2.x * scale + 5;
+            const labelY = height - p2.y * scale - 5;
+            ctx.fillStyle = "black";
+            ctx.font = "10px Arial";
+            ctx.fillText(`Z=${zValue.toFixed(1)}`, labelX, labelY);
+        }
+
+    }
+
+
+
+    // Draw explanation text on canvas
+    ctx.fillStyle = "black";
+    ctx.font = "14px Arial";
+    ctx.fillText("Líneas azules: Restricciones", 10, 20); // Adjust position as needed
+    ctx.fillText("Área verde claro: Región Factible", 10, 40); // Adjust position as needed
+
+
+  // Draw optimal solution with updated scale
+  if (optimo) {
+    ctx.fillStyle = "black";
+    ctx.beginPath();
+    ctx.arc(optimo.x * scale, height - optimo.y * scale, 5, 0, 2 * Math.PI);
+    ctx.fill();
+    // Adjust label position based on optimal point and scale
+    // const labelX = optimo.x * scale + 5;
+    // const labelY = height - optimo.y * scale - 5;
+    // ctx.fillText(`${tipo === "max" ? "Máx" : "Mín"}: (${optimo.x.toFixed(2)}, ${optimo.y.toFixed(2)}) Z=${zOpt.toFixed(2)}`, labelX, labelY);
+
+    // Display results in the dedicated area
+    resultsDisplay.innerHTML = `
+        <div class="flex flex-col items-center">
+            <span class="text-xl font-bold text-gray-900 mb-2">Solución Óptima:</span>
+            <span class="text-lg text-gray-700">X₁ = <span class="font-semibold text-blue-600">${optimo.x.toFixed(2)}</span>, X₂ = <span class="font-semibold text-blue-600">${optimo.y.toFixed(2)}</span></span>
+            <span class="text-lg text-gray-700">Z = <span class="font-semibold text-${tipo === 'max' ? 'green' : 'red'}-600">${zOpt.toFixed(2)}</span> (${tipo === 'max' ? 'Máx' : 'Mín'})</span>
+        </div>
+    `;
+
+  } else {
+      resultsDisplay.innerHTML = `<p class="text-red-600">No se encontró una solución factible o la región es no acotada.</p>`;
+  }
+
+   // Draw axis labels and numbers (optional)
+    ctx.fillStyle = "black";
+    ctx.font = "12px Arial";
+
+    // X-axis labels
+    for (let i = 0; i * scale <= width; i+= Math.max(1, Math.floor(maxDisplayX / 10))) { // Adjust step for readability
+        if (i > 0) ctx.fillText(i, i * scale - 5, height - 5);
+    }
+
+    // Y-axis labels
+     for (let i = 0; i * scale <= height; i+= Math.max(1, Math.floor(maxDisplayY / 10))) { // Adjust step for readability
+         if (i > 0) ctx.fillText(i, 5, height - i * scale + 5);
+     }
+}
+
+function limpiarDatos() {
+  document.getElementById("c1").value = "";
+  document.getElementById("c2").value = "";
+  document.getElementById("tipoOptimizacion").value = "max"; // Resetting to default option
+  document.getElementById("restricciones").value = "";
+
+  // Clear the canvas
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Clear the results display
+  document.getElementById("resultsDisplay").innerHTML = '';
+}
+</script>
+
+</body>
+</html>
