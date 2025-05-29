@@ -29,7 +29,7 @@ Esto abrirá la calculadora en tu navegador.
 ✅ ¡Listo! Ya puedes usarla.
 ________________________________________
 O tambien puedes dar una vista  directamente usando este link 
-👉 
+👉 https://brilliant-syrniki-59716e.netlify.app/ 
 
 
 
